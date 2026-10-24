@@ -1,4 +1,4 @@
-# Clear TV Islamic
+# Clear TV Islamic 
 
 <p><a href="README.ms.md">Bahasa Melayu</a> · <b>English</b> · <a href="docs/INSTALL.md">Step-by-step install guide</a> · <a href="docs/INSTALL.ms.md">Panduan pemasangan</a></p>
 
