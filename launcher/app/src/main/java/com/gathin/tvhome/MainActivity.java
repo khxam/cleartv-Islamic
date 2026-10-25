@@ -320,6 +320,13 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             date.setPadding(0, (int) (4 * density), 0, 0);
         }
         prayerRow = findViewById(R.id.prayerRow);
+        // Letakkan panel waktu solat di sebelah kanan skrin.
+        android.widget.RelativeLayout.LayoutParams prayerLp =
+                (android.widget.RelativeLayout.LayoutParams) prayerRow.getLayoutParams();
+        prayerLp.width = getResources().getDisplayMetrics().widthPixels / 2;
+        prayerLp.removeRule(android.widget.RelativeLayout.ALIGN_PARENT_START);
+        prayerLp.addRule(android.widget.RelativeLayout.ALIGN_PARENT_END);
+        prayerRow.setLayoutParams(prayerLp);
         prayerZone = cfg.prayerZone;
         if (cfg.azan && !prayerZone.isEmpty()) {
             azan = new Azan(root, () -> {
@@ -1080,7 +1087,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         String[] about = masjidMode ? Masjid.describe(picture, masjidCaptions)
                 : placesMode ? PlaceWallpapers.describe(picture) : null;
         String title = about != null ? titleCase(about[0]) : null;
-        String overview = about != null ? about[1] : "";
+        String overview = about != null && !masjidMode ? about[1] : "";
         String country = about != null && about.length > 2 ? about[2] : "";
         if (title == null ? placeName == null : title.equals(placeName)) return;
         placeName = title;
@@ -1574,6 +1581,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
         LinearLayout tiles = new LinearLayout(this);
         tiles.setOrientation(LinearLayout.HORIZONTAL);
+        tiles.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
         for (int i = 0; i < today.minutes.length; i++) {
             boolean on = i == lit;
             LinearLayout cell = new LinearLayout(this);
