@@ -130,7 +130,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private TextView shamsiDate;
     private boolean shamsi;
     /** Today's prayer times under the clock (PrayerTimes); hidden while prayerZone is empty. */
-    private TextView prayerRow;
+    private LinearLayout prayerRow;
     private String prayerZone;
     private boolean prayerRefreshRunning;
     /** The azan over Home at prayer times; null when the theme turns it off or has no prayer_zone. */
@@ -1552,27 +1552,76 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             left = 24 * 60 - nowMin + (tomorrow != null ? tomorrow : today).minutes[0];
         }
         boolean is24 = android.text.format.DateFormat.is24HourFormat(this);
-        int bright = 0xFFFFFFFF, dim = 0x80FFFFFF;
-        android.text.SpannableStringBuilder b = new android.text.SpannableStringBuilder();
+        // Lima tile besar: azan seterusnya dalam bingkai emas dengan kira detik; tarikh Hijri di atasnya.
+        float dn = getResources().getDisplayMetrics().density;
+        android.graphics.Typeface face = null;
+        try {
+            face = getResources().getFont(R.font.outfit);
+        } catch (Exception ignored) {
+            // fon sistem pun boleh
+        }
+        int lit = next >= 0 ? next : 0;
+        prayerRow.removeAllViews();
         if (!today.hijri.isEmpty()) {
-            b.append(today.hijri);
-            b.setSpan(new android.text.style.ForegroundColorSpan(dim), 0, b.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            b.append("     ");
+            TextView hijri = new TextView(this);
+            hijri.setText(today.hijri);
+            hijri.setTextSize(14f);
+            hijri.setTextColor(0xB3FFFFFF);
+            hijri.setIncludeFontPadding(false);
+            if (face != null) hijri.setTypeface(face);
+            hijri.setPadding(Math.round(6 * dn), 0, 0, Math.round(6 * dn));
+            prayerRow.addView(hijri);
         }
+        LinearLayout tiles = new LinearLayout(this);
+        tiles.setOrientation(LinearLayout.HORIZONTAL);
         for (int i = 0; i < today.minutes.length; i++) {
-            if (i > 0) b.append("    ");
-            int start = b.length();
-            b.append(PrayerTimes.NAMES[i]).append("  ").append(PrayerTimes.format(today.minutes[i], is24));
-            if (i == next) {
-                b.setSpan(new android.text.style.ForegroundColorSpan(bright), start, b.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                b.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), start, b.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            boolean on = i == lit;
+            LinearLayout cell = new LinearLayout(this);
+            cell.setOrientation(LinearLayout.VERTICAL);
+            cell.setGravity(android.view.Gravity.CENTER);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+            lp.setMargins(Math.round(4 * dn), 0, Math.round(4 * dn), 0);
+            cell.setLayoutParams(lp);
+            cell.setPadding(0, Math.round(12 * dn), 0, Math.round(12 * dn));
+            cell.setBackgroundResource(on ? R.drawable.prayer_tile_next : R.drawable.prayer_tile);
+
+            TextView name = new TextView(this);
+            name.setText(PrayerTimes.NAMES[i].toUpperCase(java.util.Locale.ROOT));
+            name.setTextSize(14f);
+            name.setLetterSpacing(0.12f);
+            name.setSingleLine(true);
+            name.setGravity(android.view.Gravity.CENTER);
+            name.setIncludeFontPadding(false);
+            name.setTextColor(on ? 0xFFE9CB7E : 0xB3FFFFFF);
+            if (face != null) name.setTypeface(face);
+
+            TextView time = new TextView(this);
+            time.setText(PrayerTimes.format(today.minutes[i], is24));
+            time.setTextSize(30f);
+            time.setSingleLine(true);
+            time.setGravity(android.view.Gravity.CENTER);
+            time.setIncludeFontPadding(false);
+            time.setTextColor(on ? 0xFFFFFFFF : 0xE6FFFFFF);
+            if (face != null) time.setTypeface(face, on ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+            time.setPadding(0, Math.round(4 * dn), 0, 0);
+
+            cell.addView(name);
+            cell.addView(time);
+            if (on) {
+                TextView left2 = new TextView(this);
+                left2.setText(PrayerTimes.countdown(left));
+                left2.setTextSize(13f);
+                left2.setSingleLine(true);
+                left2.setGravity(android.view.Gravity.CENTER);
+                left2.setIncludeFontPadding(false);
+                left2.setTextColor(0xFFE9CB7E);
+                if (face != null) left2.setTypeface(face);
+                left2.setPadding(0, Math.round(4 * dn), 0, 0);
+                cell.addView(left2);
             }
+            tiles.addView(cell);
         }
-        b.append("     ");
-        int start = b.length();
-        b.append(PrayerTimes.NAMES[next >= 0 ? next : 0]).append(" ").append(PrayerTimes.countdown(left));
-        b.setSpan(new android.text.style.ForegroundColorSpan(bright), start, b.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        prayerRow.setText(b);
+        prayerRow.addView(tiles);
         prayerRow.setVisibility(View.VISIBLE);
     }
 
