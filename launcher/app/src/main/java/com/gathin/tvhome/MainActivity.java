@@ -323,9 +323,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // Letakkan panel waktu solat di sebelah kanan skrin.
         android.widget.RelativeLayout.LayoutParams prayerLp =
                 (android.widget.RelativeLayout.LayoutParams) prayerRow.getLayoutParams();
-        prayerLp.width = getResources().getDisplayMetrics().widthPixels / 2;
+        prayerLp.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.45f);
         prayerLp.removeRule(android.widget.RelativeLayout.ALIGN_PARENT_START);
         prayerLp.addRule(android.widget.RelativeLayout.ALIGN_PARENT_END);
+        prayerLp.removeRule(android.widget.RelativeLayout.BELOW);
+        prayerLp.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+        prayerLp.topMargin = (int) (12 * getResources().getDisplayMetrics().density);
         prayerRow.setLayoutParams(prayerLp);
         prayerZone = cfg.prayerZone;
         if (cfg.azan && !prayerZone.isEmpty()) {
